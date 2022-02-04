@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net6.0-windows</TargetFramework>
+        <Nullable>enable</Nullable>
+        <UseWPF>true</UseWPF>
+        <ApplicationIcon>JH Aramis bleu reference.ico</ApplicationIcon>
+        <NeutralLanguage>en-GB</NeutralLanguage>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <None Remove="CrosswordSizeDialogue.xaml~" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="CrosswordWordToMatch.cs" />
+      <Compile Remove="CrosswordSizeDialogue.xaml.cs" />
+      <Compile Remove="CrosswordGrid.cs" />
+      <Compile Remove="CrosswordWindow.xaml.cs" />
+      <Compile Remove="CrosswordWordTemplate.cs" />
+      <Compile Remove="Clue.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Page Remove="CrosswordSizeDialogue.xaml" />
+      <Page Remove="CrosswordWindow.xaml" />
+    </ItemGroup>
+
+</Project>

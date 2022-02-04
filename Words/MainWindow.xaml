@@ -1,0 +1,91 @@
+﻿<Window x:Class="Words.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Word lists" Height="800" Width="1200" WindowStartupLocation="CenterScreen" WindowState="Normal" WindowStyle="ThreeDBorderWindow" Background="SlateGray" Loaded="Window_Loaded">
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Margin" Value="8 3"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="4 3"/>
+            <Setter Property="Padding" Value="4 3"/>
+            <Setter Property="MinWidth" Value="80"/>
+        </Style>
+    </Window.Resources>
+    <Grid Margin="6" Background="Silver">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Menu>
+            <MenuItem Header="File">
+                <MenuItem Header="Review file" Click="menuitemFileReview_Click"/>
+                <Separator/>
+                <MenuItem Header="Close application" FontWeight="Medium" Click="menuitemCloseApp_Click"/>
+            </MenuItem>
+            <MenuItem Header="Searches">
+                <MenuItem Header="Find words matching pattern" Click="menuitemWordsMatchingPattern_Click"/>
+                <MenuItem Header="Find words of length" Click="menuitemWordsOfLength_Click"/>
+                <MenuItem Header="Find words with all their letters in order" Click="MenuItemLettersInOrder_Click"/>
+                <MenuItem Header="Start and end of word match" Click="MenuItemStartEqualsEnd_Click"/>
+                <MenuItem Header="Palindromes" Click="MenuItemPalindromes_Click"/>
+                <MenuItem Header="Alternate letters match" Click="MenuItemAlternates_Click"/>
+                <MenuItem Header="ROT13 pairs" Click="Rot13MenuItem_Click"/>
+            </MenuItem>
+            <!--<MenuItem Header="Tools">
+                <MenuItem x:Name="menuitemWordBrain" Header="WordBrain helper" FontWeight="Medium" Foreground="DarkBlue" Click="menuitemWordBrain_Click"/>
+            </MenuItem>-->
+            <MenuItem Header="Troubleshoot">
+                <MenuItem x:Name="MenuitemFileErrors" Header="Detect word list files with errors" Click="menuitemFileErrors_Click"/>
+                <MenuItem x:Name="MenuitemSortingCorrection" Header="Correct sorting errors" Click="menuitemSortingCorrection_Click"/>
+                <MenuItem x:Name="MenuitemRepeatsCorrection" Header="Correct repeated word errors" Click="menuitemRepeatsCorrection_Click"/>
+                <MenuItem x:Name="MenuitemWrongFileCorrection" Header="Correct word in wrong file errors" Click="menuitemWrongFileCorrection_Click" />
+            </MenuItem>
+        </Menu>
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <TextBlock VerticalAlignment="Center">Sort results by</TextBlock>
+            <Button Click="buttonSortAlpha_Click">A-Z</Button>
+            <Button Click="buttonSortLength_Click">Length</Button>
+        </StackPanel>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100"></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock VerticalAlignment="Center">Language</TextBlock>
+                <RadioButton Margin="8 3 0 0" VerticalContentAlignment="Center" FontWeight="DemiBold" IsChecked="True" Checked="radiobuttonEnglish_Checked">English</RadioButton>
+                <RadioButton Margin="8 3 0 3" VerticalContentAlignment="Center" FontWeight="DemiBold" Checked="radiobuttonFrench_Checked">French</RadioButton>
+                <Button Click="buttonFindAdd_Click">Find / Add</Button>
+                <Button Click="buttonTemplate_Click">Template</Button>
+                <Button Click="buttonAnagram_Click">Anagram</Button>
+                <Button Click="buttonSubsets_Click">Subsets</Button>
+                <Button Click="buttonCountdown_Click" FontWeight="DemiBold" Foreground="DarkBlue">Countdown</Button>
+                <Button Click="buttonDelete_Click">Delete</Button>
+                <Button Click="buttonCount_Click">Count</Button>
+                <Button Click="buttonClear_Click">Clear</Button>
+                <Button Click="buttonHexWords_Click" ToolTip="Words using only the letters A to F">Hex words</Button>
+                <Button ToolTip="Words differing by a single letter" Click="buttonSingleStep_Click">One letter</Button>
+                <Button ToolTip="Words with the end moved to the start to make a new word" Click="buttonBackToFrontStep_Click">AB-BA</Button>
+                <!-- <Button FontWeight="Medium" Margin="0 12 0 12" Foreground="Crimson" Click="CrosswordsButton_OnClick">Crosswords</Button> -->
+                <Button FontWeight="Medium" Click="buttonClose_Click">Close</Button>
+                <CheckBox x:Name="ChkClear" Margin="4" VerticalContentAlignment="Center">Clear first</CheckBox>
+            </StackPanel>
+            <ListBox x:Name="ListboxResults" Margin="2" Grid.Column="1"/>
+        </Grid>
+        <StatusBar Grid.Row="3">
+            <StatusBarItem FontWeight="Bold">Words</StatusBarItem>
+            <StatusBarItem x:Name="StatusbaritemLang" FontWeight="Medium" Foreground="MediumBlue">Language</StatusBarItem>
+            <Separator/>
+            <StatusBarItem>
+                <ProgressBar Width="100" Height="20" x:Name="ProgressbarProgress"/>
+            </StatusBarItem>
+            <StatusBarItem x:Name="StatusbaritemRubric" FontWeight="Bold" Foreground="Brown">[action]</StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>
