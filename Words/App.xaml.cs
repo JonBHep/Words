@@ -43,7 +43,7 @@ namespace Words
             }
             else
             {
-                App.Current.Shutdown();
+                Current.Shutdown();
             }
         }
 

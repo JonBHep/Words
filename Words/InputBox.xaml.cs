@@ -23,7 +23,7 @@ public partial class InputBox
 
     private void Window_ContentRendered(object sender, EventArgs e)
     {
-        Icon = this.Owner.Icon;
+        Icon = Owner.Icon;
         ResponseBox.Focus();
     }
 

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Windows;
 
 namespace Words;
 
@@ -48,25 +47,25 @@ public sealed class Core
         {
             if (_french)
             {
-                return System.IO.Path.Combine(Jbh.AppManager.DataPath, "French");
+                return Path.Combine(Jbh.AppManager.DataPath, "French");
             }
 
-            return System.IO.Path.Combine(Jbh.AppManager.DataPath, "English");
+            return Path.Combine(Jbh.AppManager.DataPath, "English");
         }
     }
 
-    public string ResourcePool => System.IO.Path.Combine(Jbh.AppManager.DataPath, "Resources");
+    public string ResourcePool => Path.Combine(Jbh.AppManager.DataPath, "Resources");
 
     public bool AddWordToDictionary(string newWord)
     {
         string targetfile = FilePath2015(newWord);
-        string tempryfile = System.IO.Path.Combine(DataPool, "Temp.txt");
+        string tempryfile = Path.Combine(DataPool, "Temp.txt");
 
         // Create a new file if necessary
-        if (!System.IO.File.Exists(targetfile))
+        if (!File.Exists(targetfile))
         {
             FileStream fs = new FileStream(targetfile, FileMode.Create);
-            using System.IO.StreamWriter sw = new System.IO.StreamWriter(fs, JbhEncoding);
+            using StreamWriter sw = new StreamWriter(fs, JbhEncoding);
             sw.WriteLine(newWord);
             return true;
         }
@@ -74,7 +73,7 @@ public sealed class Core
         bool flag = false;
         // Check whether the word is already present
 
-        using (System.IO.StreamReader sr = new System.IO.StreamReader(targetfile, JbhEncoding))
+        using (StreamReader sr = new StreamReader(targetfile, JbhEncoding))
         {
             while (!sr.EndOfStream)
             {
@@ -96,10 +95,10 @@ public sealed class Core
         }
 
         // Copy the file, adding the new word in the appropriate location
-        using (System.IO.StreamReader sr = new System.IO.StreamReader(targetfile,JbhEncoding))
+        using (StreamReader sr = new StreamReader(targetfile,JbhEncoding))
         {
             FileStream fs = new FileStream(tempryfile, FileMode.Create);
-            using (System.IO.StreamWriter sw = new System.IO.StreamWriter(fs, JbhEncoding))
+            using (StreamWriter sw = new StreamWriter(fs, JbhEncoding))
             {
                 while (!sr.EndOfStream)
                 {
@@ -124,27 +123,27 @@ public sealed class Core
             } 
         } 
 
-        System.IO.File.Delete(targetfile);
-        System.IO.File.Move(tempryfile, targetfile);
+        File.Delete(targetfile);
+        File.Move(tempryfile, targetfile);
         return true;
     }
 
     public bool RemoveWordFromDictionary(string targetWord)
     {
         string targetfile = FilePath2015(targetWord);
-        string tempryfile = System.IO.Path.Combine(DataPool, "Temp.txt");
+        string tempryfile = Path.Combine(DataPool, "Temp.txt");
 
-        if (!System.IO.File.Exists(targetfile))
+        if (!File.Exists(targetfile))
         {
             return false;
         }
 
         // Copy the file, apart from the target word
         bool flag = false;
-        using (System.IO.StreamReader sr = new System.IO.StreamReader(targetfile,JbhEncoding))
+        using (StreamReader sr = new StreamReader(targetfile,JbhEncoding))
         {
             FileStream fs = new FileStream(tempryfile, FileMode.Create);
-            using (System.IO.StreamWriter sw = new System.IO.StreamWriter(fs, Encoding.Default))
+            using (StreamWriter sw = new StreamWriter(fs, Encoding.Default))
             {
                 while (!sr.EndOfStream)
                 {
@@ -164,8 +163,8 @@ public sealed class Core
             }
         }
 
-        System.IO.File.Delete(targetfile);
-        System.IO.File.Move(tempryfile, targetfile);
+        File.Delete(targetfile);
+        File.Move(tempryfile, targetfile);
         return flag;
     }
 
@@ -206,11 +205,11 @@ public sealed class Core
     {
         if (ltrs.Length < 3)
         {
-            return System.IO.Path.Combine(DataPool, "Words__small.txt");
+            return Path.Combine(DataPool, "Words__small.txt");
         }
 
         ltrs = ltrs.Substring(0, 3).ToLower();
-        return System.IO.Path.Combine(DataPool, "Words_" + ltrs + ".txt");
+        return Path.Combine(DataPool, "Words_" + ltrs + ".txt");
     }
 
     private string FilePath2015(int letr1, int letr2, int letr3)
@@ -278,6 +277,19 @@ public sealed class Core
         char[] tmp = m.ToArray();
         Array.Sort(tmp);
         return new string(tmp);
+    }
+    
+    public static string VowelMix(string m)
+    {
+        var r = string.Empty;
+        foreach (var c in m)
+        {
+            if ("AEIOUaeiou".Contains(c))
+            {
+                r+=c;
+            }
+        }
+        return r;
     }
 
     public static int EndAsStart(string wd)
@@ -392,68 +404,66 @@ public sealed class Core
 
     public List<string> ListOfFilesWithErrors()
     {
-        List<string> returnList = new List<string>();
-        List<string> realTriples = ListOfNonEmptyTriples();
-        string shortwordspec = FilePath2015("x");
-        bool outOfOrder = false;
-        bool wrongFile = false;
-        bool repeatedWord = false;
-        string previous = " ";
-        using (System.IO.StreamReader sr = new System.IO.StreamReader(shortwordspec,JbhEncoding))
+        var returnList = new List<string>();
+        var realTriples = ListOfNonEmptyTriples();
+        var shortwordspec = FilePath2015("x");
+        var outOfOrder = false;
+        var wrongFile = false;
+        var repeatedWord = false;
+        var previous = " ";
+        using (var sr = new StreamReader(shortwordspec,JbhEncoding))
         {
             while (!sr.EndOfStream)
             {
-                string? red = sr.ReadLine();
-                if (red is { } wd)
+                var red = sr.ReadLine();
+                if (red is not { } wd) continue;
+                if (wd.Length > 2)
                 {
-                       if (wd.Length > 2)
-                       {
-                           wrongFile = true;
-                       }
-
-                       int j = String.Compare(previous, wd, StringComparison.Ordinal);
-                       if (j > 0)
-                       {
-                           outOfOrder = true;
-                       }
-
-                       if (j == 0)
-                       {
-                           repeatedWord = true;
-                       }
-
-                       previous = wd;
+                    wrongFile = true;
                 }
+
+                var j = String.Compare(previous, wd, StringComparison.Ordinal);
+                if (j > 0)
+                {
+                    outOfOrder = true;
+                }
+
+                if (j == 0)
+                {
+                    repeatedWord = true;
+                }
+
+                previous = wd;
             }
         }
 
         if (outOfOrder)
         {
-            returnList.Add(System.IO.Path.GetFileName(shortwordspec) + " sorting errors");
+            returnList.Add(Path.GetFileName(shortwordspec) + " sorting errors");
         }
 
         if (wrongFile)
         {
-            returnList.Add(System.IO.Path.GetFileName(shortwordspec) + " words in wrong file");
+            returnList.Add(Path.GetFileName(shortwordspec) + " words in wrong file");
         }
 
         if (repeatedWord)
         {
-            returnList.Add(System.IO.Path.GetFileName(shortwordspec) + " repeated words in file");
+            returnList.Add(Path.GetFileName(shortwordspec) + " repeated words in file");
         }
 
-        foreach (string stem in realTriples)
+        foreach (var stem in realTriples)
         {
-            string fspec = FilePath2015(stem);
+            var fspec = FilePath2015(stem);
             outOfOrder = false;
             wrongFile = false;
             repeatedWord = false;
             previous = " ";
-            using (System.IO.StreamReader sr = new System.IO.StreamReader(fspec,JbhEncoding))
+            using (var sr = new StreamReader(fspec,JbhEncoding))
             {
                 while (!sr.EndOfStream)
                 {
-                    string? red = sr.ReadLine();
+                    var red = sr.ReadLine();
                     if (red is { } wd)
                     {
                         if (!wd.StartsWith(stem))
@@ -461,7 +471,7 @@ public sealed class Core
                             wrongFile = true;
                         }
 
-                        int j = String.Compare(previous, wd, StringComparison.Ordinal);
+                        var j = String.Compare(previous, wd, StringComparison.Ordinal);
                         if (j > 0)
                         {
                             outOfOrder = true;
@@ -479,17 +489,17 @@ public sealed class Core
 
             if (outOfOrder)
             {
-                returnList.Add(System.IO.Path.GetFileName(fspec) + " sorting errors");
+                returnList.Add(Path.GetFileName(fspec) + " sorting errors");
             }
 
             if (wrongFile)
             {
-                returnList.Add(System.IO.Path.GetFileName(fspec) + " words in wrong file");
+                returnList.Add(Path.GetFileName(fspec) + " words in wrong file");
             }
 
             if (repeatedWord)
             {
-                returnList.Add(System.IO.Path.GetFileName(fspec) + " repeated words in file");
+                returnList.Add(Path.GetFileName(fspec) + " repeated words in file");
             }
         }
 
@@ -500,13 +510,13 @@ public sealed class Core
     {
         List<string> returnList = new List<string>();
         List<string> actualfiles = ListOfActualWordFileSpecs();
-        string tempryfile = System.IO.Path.Combine(DataPool, "Temp.txt");
+        string tempryfile = Path.Combine(DataPool, "Temp.txt");
         List<string> sorter = new List<string>();
         foreach (string fs in actualfiles)
         {
             bool outOfOrder = false;
             string previous = " ";
-            using (var sr = new System.IO.StreamReader(fs,JbhEncoding))
+            using (var sr = new StreamReader(fs,JbhEncoding))
             {
                 while (!sr.EndOfStream)
                 {
@@ -540,7 +550,7 @@ public sealed class Core
 
                 sorter.Sort();
                 FileStream ruisseau = new FileStream(tempryfile, FileMode.Create);
-                using (System.IO.StreamWriter sw = new System.IO.StreamWriter(ruisseau, JbhEncoding))
+                using (StreamWriter sw = new StreamWriter(ruisseau, JbhEncoding))
                 {
                     foreach (string w in sorter)
                     {
@@ -548,9 +558,9 @@ public sealed class Core
                     }
                 }
 
-                System.IO.File.Delete(fs);
-                System.IO.File.Move(tempryfile, fs);
-                returnList.Add(System.IO.Path.GetFileName(fs) + " sorting errors corrected");
+                File.Delete(fs);
+                File.Move(tempryfile, fs);
+                returnList.Add(Path.GetFileName(fs) + " sorting errors corrected");
             }
         }
 
@@ -562,12 +572,12 @@ public sealed class Core
         // Assumes sorting already corrected
         List<string> returnList = new List<string>();
         List<string> actualfiles = ListOfActualWordFileSpecs();
-        string tempryfile = System.IO.Path.Combine(DataPool, "Temp.txt");
+        string tempryfile = Path.Combine(DataPool, "Temp.txt");
         foreach (string fs in actualfiles)
         {
             bool repeats = false;
             string previous = " ";
-            using (System.IO.StreamReader sr = new System.IO.StreamReader(fs,JbhEncoding))
+            using (StreamReader sr = new StreamReader(fs,JbhEncoding))
             {
                 while (!sr.EndOfStream)
                 {
@@ -587,10 +597,10 @@ public sealed class Core
             if (repeats)
             {
                 previous = " ";
-                using (System.IO.StreamReader sr = new System.IO.StreamReader(fs,JbhEncoding))
+                using (StreamReader sr = new StreamReader(fs,JbhEncoding))
                 {
                     FileStream fstream = new FileStream(tempryfile, FileMode.Create);
-                    using (System.IO.StreamWriter sw = new System.IO.StreamWriter(fstream, JbhEncoding))
+                    using (StreamWriter sw = new StreamWriter(fstream, JbhEncoding))
                     {
                         while (!sr.EndOfStream)
                         {
@@ -608,9 +618,9 @@ public sealed class Core
                     }
                 }
 
-                System.IO.File.Delete(fs);
-                System.IO.File.Move(tempryfile, fs);
-                returnList.Add(System.IO.Path.GetFileName(fs) + " repeated words corrected");
+                File.Delete(fs);
+                File.Move(tempryfile, fs);
+                returnList.Add(Path.GetFileName(fs) + " repeated words corrected");
             }
         }
 
@@ -626,7 +636,7 @@ public sealed class Core
         string shortwordspec = FilePath2015("x");
         bool wrongFile = false;
 
-        using (System.IO.StreamReader sr = new System.IO.StreamReader(shortwordspec,JbhEncoding))
+        using (StreamReader sr = new StreamReader(shortwordspec,JbhEncoding))
         {
             while (!sr.EndOfStream)
             {
@@ -641,14 +651,14 @@ public sealed class Core
 
         if (wrongFile)
         {
-            returnList.Add(System.IO.Path.GetFileName(shortwordspec) + " words in wrong file");
+            returnList.Add(Path.GetFileName(shortwordspec) + " words in wrong file");
         }
 
         foreach (string stem in realTriples)
         {
             string fspec = FilePath2015(stem);
             wrongFile = false;
-            using (System.IO.StreamReader sr = new System.IO.StreamReader(fspec,JbhEncoding))
+            using (StreamReader sr = new StreamReader(fspec,JbhEncoding))
             {
                 while (!sr.EndOfStream)
                 {
@@ -666,7 +676,7 @@ public sealed class Core
 
             if (wrongFile)
             {
-                returnList.Add(System.IO.Path.GetFileName(fspec) + " words in wrong file");
+                returnList.Add(Path.GetFileName(fspec) + " words in wrong file");
             }
         }
 
@@ -684,11 +694,11 @@ public sealed class Core
 
     private void RemoveWordFromSpecificFile(string word, string filespec)
     {
-        string tempryfile = System.IO.Path.Combine(DataPool, "Temp.txt");
-        using (System.IO.StreamReader sr = new System.IO.StreamReader(filespec,JbhEncoding))
+        string tempryfile = Path.Combine(DataPool, "Temp.txt");
+        using (StreamReader sr = new StreamReader(filespec,JbhEncoding))
         {
             FileStream fs = new FileStream(tempryfile, FileMode.Create);
-            using (System.IO.StreamWriter sw = new System.IO.StreamWriter(fs, JbhEncoding))
+            using (StreamWriter sw = new StreamWriter(fs, JbhEncoding))
             {
                 while (!sr.EndOfStream)
                 {
@@ -704,15 +714,15 @@ public sealed class Core
             }
         }
 
-        System.IO.File.Delete(filespec);
-        System.IO.File.Move(tempryfile, filespec);
+        File.Delete(filespec);
+        File.Move(tempryfile, filespec);
     }
 
     public List<string> ListOfActualWordFileSpecs()
     {
         List<string> returnList = new List<string>();
         string shorty = FilePath2015("x");
-        if (System.IO.File.Exists(shorty))
+        if (File.Exists(shorty))
         {
             returnList.Add(shorty);
         }
@@ -724,7 +734,7 @@ public sealed class Core
                 for (int letter3 = 1; letter3 < 27; letter3++)
                 {
                     string filespec = FilePath2015(letter1, letter2, letter3);
-                    if (System.IO.File.Exists(filespec))
+                    if (File.Exists(filespec))
                     {
                         returnList.Add(filespec);
                     }
@@ -748,7 +758,7 @@ public sealed class Core
                 {
                     char j3 = (char) (96 + letter3);
                     string filespec = FilePath2015(letter1, letter2, letter3);
-                    if (System.IO.File.Exists(filespec))
+                    if (File.Exists(filespec))
                     {
                         string trip = j1.ToString() + j2.ToString() + j3.ToString();
                         returnList.Add(trip);
@@ -766,7 +776,7 @@ public sealed class Core
         List<string> fileList = ListOfActualWordFileSpecs();
         foreach (string f in fileList)
         {
-            using System.IO.StreamReader sr = new System.IO.StreamReader(f,JbhEncoding);
+            using StreamReader sr = new StreamReader(f,JbhEncoding);
             while (!sr.EndOfStream)
             {
                 string? red=sr.ReadLine();
@@ -788,9 +798,9 @@ public sealed class Core
         bool flag = false;
         searchword = searchword.ToLower().Trim();
         string subfile = FilePath2015(searchword);
-        if (System.IO.File.Exists(subfile))
+        if (File.Exists(subfile))
         {
-            using System.IO.StreamReader sr = new System.IO.StreamReader(subfile,JbhEncoding);
+            using StreamReader sr = new StreamReader(subfile,JbhEncoding);
             while (!sr.EndOfStream)
             {
                 string? red = sr.ReadLine();
@@ -811,10 +821,8 @@ public sealed class Core
 
             return flag;
         }
-        else
-        {
-            return false;
-        }
+
+        return false;
     }
 
     private static string Stringy(int size, char c)
