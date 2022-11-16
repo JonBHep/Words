@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="Word lists" Height="880" Width="1200" WindowStartupLocation="CenterScreen" WindowState="Normal" 
-        WindowStyle="None" Background="Transparent" AllowsTransparency="True" Loaded="Window_Loaded">
+        WindowStyle="None" Background="Transparent" AllowsTransparency="True" Loaded="Window_Loaded" ContentRendered="MainWindow_OnContentRendered">
     <Window.Resources>
         <Style TargetType="TextBlock">
             <Setter Property="Margin" Value="8 3"/>
@@ -73,9 +73,9 @@
                 <Button Click="buttonDelete_Click">Delete</Button>
                 <Button Click="buttonCount_Click">Count</Button>
                 <Button Click="buttonClear_Click">Clear</Button>
-                <Button Click="buttonHexWords_Click" ToolTip="Words using only the letters A to F">Hex words</Button>
+                <Button Click="HexWordsButton_Click" ToolTip="Words using only the letters A to F">Hex words</Button>
                 <Button ToolTip="Words differing by a single letter" Click="buttonSingleStep_Click">One letter</Button>
-                <Button ToolTip="Words with the end moved to the start to make a new word" Click="buttonBackToFrontStep_Click">AB-BA</Button>
+                <Button ToolTip="Words with the end moved to the start to make a new word" Click="BackToFrontButton_Click">AB-BA</Button>
                 <!-- <Button FontWeight="Medium" Margin="0 12 0 12" Foreground="Crimson" Click="CrosswordsButton_OnClick">Crosswords</Button> -->
                 <Button FontWeight="Medium" Click="buttonClose_Click">Close</Button>
                 <CheckBox x:Name="ChkClear" Margin="4" VerticalContentAlignment="Center">Clear first</CheckBox>
@@ -87,7 +87,7 @@
             <StatusBarItem x:Name="StatusbaritemLang" FontWeight="Medium" Foreground="MediumBlue">Language</StatusBarItem>
             <Separator/>
             <StatusBarItem>
-                <ProgressBar Width="200" Height="10" VerticalAlignment="Center" Foreground="Orange" Background="Chocolate" Maximum="10" Value="5" x:Name="ProgressbarProgress"/>
+                <ProgressBar Width="200" Height="10" VerticalAlignment="Center" Foreground="Orange" Background="Chocolate" Maximum="100" Value="25" x:Name="ProgressbarProgress"/>
             </StatusBarItem>
             <StatusBarItem x:Name="StatusbaritemRubric" FontWeight="Bold" Foreground="Brown">[action]</StatusBarItem>
         </StatusBar>

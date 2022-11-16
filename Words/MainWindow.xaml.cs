@@ -18,14 +18,17 @@ public partial class MainWindow
     {
         InitializeComponent();
         _updatePbDelegate = ProgressbarProgress.SetValue;
+        _currentFiles = new List<string>();
     }
 
     // A Delegate that matches the signature of the ProgressBar's SetValue method
     private delegate void UpdateProgressBarDelegate(DependencyProperty dp, object value);
 
-    // An instance of the delegate - initialised in window Loaded
-    readonly UpdateProgressBarDelegate _updatePbDelegate;
+    // An instance of the delegate - initialised in window Loaded to the SetValue method of the ProgressBarProgress control
+    private readonly UpdateProgressBarDelegate _updatePbDelegate;
 
+    private List<string> _currentFiles;
+    
     private void menuitemCloseApp_Click(object sender, RoutedEventArgs e)
     {
         Close();
@@ -38,28 +41,28 @@ public partial class MainWindow
 
     private void buttonAnagram_Click(object sender, RoutedEventArgs e)
     {
-        InputBox w = new InputBox("Anagram finder", "Enter a word or string of letters", string.Empty)
+        var w = new InputBox("Anagram finder", "Enter a word or string of letters", string.Empty)
         {
             Owner = this
         };
         if (w.ShowDialog() == true)
         {
-            string rootword = w.ResponseText;
-            List<string> anags = new List<string>();
+            var rootword = w.ResponseText;
+            var anags = new List<string>();
             rootword = rootword.ToLower().Trim();
             StatusbaritemRubric.Content = "Anagrams of " + rootword.ToUpper();
             rootword = Core.SortedLetterMix(rootword);
-            List<string> files = Core.Instance.ListOfActualWordFileSpecs();
-            int total = files.Count;
-            int counter = 0;
-            foreach (string f in files)
+            //List<string> files = Core.Instance.ListOfActualWordFileSpecs();
+            var total = _currentFiles.Count;
+            var counter = 0;
+            foreach (var f in _currentFiles)
             {
                 counter++;
                 ReportProgress(counter, total);
-                using System.IO.StreamReader sr = new System.IO.StreamReader(f, Core.JbhEncoding);
+                using var sr = new System.IO.StreamReader(f, Core.JbhEncoding);
                 while (!sr.EndOfStream)
                 {
-                    string? red = sr.ReadLine();
+                    var red = sr.ReadLine();
                     if (red is { } wd)
                     {
                         if (rootword.Length == wd.Length)
@@ -74,7 +77,7 @@ public partial class MainWindow
             }
 
             ListboxResults.Items.Clear();
-            foreach (string a in anags)
+            foreach (var a in anags)
             {
                 AddResult(a);
             }
@@ -102,36 +105,38 @@ public partial class MainWindow
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
-
+        ProgressbarProgress.Maximum = 100; // to ensure correct display of values
         StatusbaritemLang.Content = "English";
         StatusbaritemRubric.Content = null;
+        _loaded = true;
     }
 
+    private bool _loaded;
     private void buttonSubsets_Click(object sender, RoutedEventArgs e)
     {
-        InputBox w = new InputBox("Subset anagram finder", "Enter a word or string of letters", string.Empty)
+        var w = new InputBox("Subset anagram finder", "Enter a word or string of letters", string.Empty)
         {
             Owner = this
         };
         if (w.ShowDialog() == true)
         {
             DoClearIf();
-            string rootword = w.ResponseText;
-            List<string> anags = new List<string>();
+            var rootword = w.ResponseText;
+            var anags = new List<string>();
             rootword = rootword.ToLower().Trim();
             StatusbaritemRubric.Content = "Subset anagrams of " + rootword.ToUpper();
             rootword = Core.SortedLetterMix(rootword);
-            List<string> files = Core.Instance.ListOfActualWordFileSpecs();
-            int total = files.Count;
-            int counter = 0;
-            foreach (string f in files)
+            //List<string> files = Core.Instance.ListOfActualWordFileSpecs();
+            var total = _currentFiles.Count;
+            var counter = 0;
+            foreach (var f in _currentFiles)
             {
                 counter++;
                 ReportProgress(counter, total);
-                using System.IO.StreamReader sr = new System.IO.StreamReader(f, Core.JbhEncoding);
+                using var sr = new System.IO.StreamReader(f, Core.JbhEncoding);
                 while (!sr.EndOfStream)
                 {
-                    string? red = sr.ReadLine();
+                    var red = sr.ReadLine();
                     if (red is { } wd)
                     {
                         if (Core.Instance.IsSubset(wd, rootword))
@@ -143,44 +148,43 @@ public partial class MainWindow
             }
 
             ListboxResults.Items.Clear();
-            foreach (string a in anags)
+            foreach (var a in anags)
             {
                 AddResult(a);
             }
         }
     }
 
-    private void buttonHexWords_Click(object sender, RoutedEventArgs e)
+    private void HexWordsButton_Click(object sender, RoutedEventArgs e)
     {
         DoClearIf();
-        List<string> hexes = new List<string>();
+        var hexes = new List<string>();
         StatusbaritemRubric.Content = "Words using A-F";
-        List<string> files = Core.Instance.ListOfActualWordFileSpecs();
-        int total = files.Count;
-        int counter = 0;
-        foreach (string f in files)
+        var total = _currentFiles.Count;
+        var counter = 0;
+        foreach (var f in _currentFiles)
         {
             counter++;
             ReportProgress(counter, total);
-            using System.IO.StreamReader sr = new System.IO.StreamReader(f, Core.JbhEncoding);
+            using var sr = new System.IO.StreamReader(f, Core.JbhEncoding);
             while (!sr.EndOfStream)
             {
-                string? red = sr.ReadLine();
-                if (red is { } wd)
+                var red = sr.ReadLine();
+                if (red != null)
                 {
-                    if (Core.Instance.UsesOnlyAtoF(wd))
+                    if (Core.Instance.UsesOnlyAtoF(red))
                     {
-                        hexes.Add(wd);
+                        hexes.Add(red);
                     }
                 }
             }
         }
 
         ListboxResults.Items.Clear();
-        foreach (string a in hexes)
+        foreach (var a in hexes)
         {
-            string w = "0x" + a;
-            int i = Convert.ToInt32(w, 16);
+            var w = "0x" + a;
+            var i = Convert.ToInt32(w, 16);
             AddResult($"{a} = {i}");
         }
     }
@@ -192,28 +196,28 @@ public partial class MainWindow
             return;
         }
 
-        List<string> sortingList = new List<string>();
-        List<string> sortedList = new List<string>();
+        var sortingList = new List<string>();
+        var sortedList = new List<string>();
         foreach (ListBoxItem lbi in ListboxResults.Items)
         {
-            TextBlock tb = (TextBlock) lbi.Content;
-            string w = tb.Text;
+            var tb = (TextBlock) lbi.Content;
+            var w = tb.Text;
             sortingList.Add(w);
         }
 
         ListboxResults.Items.Clear();
-        int maxlen = 0;
-        foreach (string s in sortingList)
+        var maxLen = 0;
+        foreach (var s in sortingList)
         {
-            if (s.Length > maxlen)
+            if (s.Length > maxLen)
             {
-                maxlen = s.Length;
+                maxLen = s.Length;
             }
         }
 
-        for (int g = maxlen; g > 0; g--)
+        for (var g = maxLen; g > 0; g--)
         {
-            foreach (string s in sortingList)
+            foreach (var s in sortingList)
             {
                 if (s.Length == g)
                 {
@@ -222,7 +226,7 @@ public partial class MainWindow
             }
         }
 
-        foreach (string s in sortedList)
+        foreach (var s in sortedList)
         {
             AddResult(s);
         }
@@ -235,17 +239,17 @@ public partial class MainWindow
             return;
         }
 
-        List<string> sortingList = new List<string>();
+        var sortingList = new List<string>();
         foreach (ListBoxItem lbi in ListboxResults.Items)
         {
-            TextBlock tb = (TextBlock) lbi.Content;
-            string w = tb.Text;
+            var tb = (TextBlock) lbi.Content;
+            var w = tb.Text;
             sortingList.Add(w);
         }
 
         sortingList.Sort();
         ListboxResults.Items.Clear();
-        foreach (string s in sortingList)
+        foreach (var s in sortingList)
         {
             AddResult(s);
         }
@@ -260,13 +264,13 @@ public partial class MainWindow
     {
         UiServices.SetBusyState();
         ListboxResults.Items.Clear();
-        List<string> badfiles = Core.Instance.ListOfFilesWithErrors();
-        foreach (string f in badfiles)
+        var badFiles = Core.Instance.ListOfFilesWithErrors();
+        foreach (var f in badFiles)
         {
             AddResult(f);
         }
 
-        if (badfiles.Count == 0)
+        if (badFiles.Count == 0)
         {
             AddResult("No errors found");
         }
@@ -276,8 +280,8 @@ public partial class MainWindow
     {
         UiServices.SetBusyState();
         ListboxResults.Items.Clear();
-        List<string> badfiles = Core.Instance.CorrectSortingErrors();
-        foreach (string f in badfiles)
+        var badfiles = Core.Instance.CorrectSortingErrors();
+        foreach (var f in badfiles)
         {
             AddResult(f);
         }
@@ -290,19 +294,19 @@ public partial class MainWindow
 
     private void menuitemWordsOfLength_Click(object sender, RoutedEventArgs e)
     {
-        InputBox w = new InputBox("Words of length N", "Enter the word length", "5")
+        var w = new InputBox("Words of length N", "Enter the word length", "5")
         {
             Owner = this
         };
         if (w.ShowDialog() == true)
         {
             DoClearIf();
-            string s = w.ResponseText;
+            var s = w.ResponseText;
             if (int.TryParse(s, out var lg))
             {
-                List<string> matches = Core.Instance.ListOfWordsOfLength(lg);
+                var matches = Core.Instance.ListOfWordsOfLength(lg);
                 ListboxResults.Items.Clear();
-                foreach (string a in matches)
+                foreach (var a in matches)
                 {
                     AddResult(a);
                 }
@@ -316,8 +320,8 @@ public partial class MainWindow
     {
         UiServices.SetBusyState();
         ListboxResults.Items.Clear();
-        List<string> badfiles = Core.Instance.CorrectRepeatedWordErrors();
-        foreach (string f in badfiles)
+        var badfiles = Core.Instance.CorrectRepeatedWordErrors();
+        foreach (var f in badfiles)
         {
             AddResult(f);
         }
@@ -330,26 +334,26 @@ public partial class MainWindow
 
     private void buttonFindAdd_Click(object sender, RoutedEventArgs e)
     {
-        InputBox w = new InputBox("Find word", "Enter a word or string of letters", string.Empty)
+        var w = new InputBox("Find word", "Enter a word or string of letters", string.Empty)
         {
             Owner = this
         };
         if (w.ShowDialog() == true)
         {
-            string s = w.ResponseText;
+            var s = w.ResponseText;
             if (Core.Instance.IsKnown(s))
             {
                 StatusbaritemRubric.Content = "Word is listed: " + s.ToUpper();
             }
             else
             {
-                MessageBoxResult answer = MessageBox.Show(
+                var answer = MessageBox.Show(
                     "Word is not listed: " + s.ToUpper() + "\n\nDo you want to add it?", "Find word"
                     , MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (answer == MessageBoxResult.Yes)
                 {
-                    bool was = Core.Instance.AddWordToDictionary(s);
-                    string msg = s.ToUpper() + " was not added";
+                    var was = Core.Instance.AddWordToDictionary(s);
+                    var msg = s.ToUpper() + " was not added";
                     if (was)
                     {
                         msg = s.ToUpper() + " was added";
@@ -363,22 +367,22 @@ public partial class MainWindow
 
     private void menuitemFileReview_Click(object sender, RoutedEventArgs e)
     {
-        Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog
+        var dlg = new Microsoft.Win32.OpenFileDialog
         {
             DefaultExt = ".txt", Filter = "Text files (*.txt)|*.txt"
             , InitialDirectory = Core.Instance.ResourcePool
         };
-        bool? result = dlg.ShowDialog();
-        int finds = 0;
-        int unkns = 0;
+        var result = dlg.ShowDialog();
+        var finds = 0;
+        var unkns = 0;
         if (result.HasValue && result.Value)
         {
             AddResult("Unknown words in " + dlg.FileName);
-            using (System.IO.StreamReader sr = new System.IO.StreamReader(dlg.FileName, Core.JbhEncoding))
+            using (var sr = new System.IO.StreamReader(dlg.FileName, Core.JbhEncoding))
             {
                 while (!sr.EndOfStream)
                 {
-                    string? red = sr.ReadLine();
+                    var red = sr.ReadLine();
                     if (red is { } wd)
                     {
                         finds++;
@@ -422,29 +426,29 @@ public partial class MainWindow
 
     private void TemplateMatch()
     {
-        InputBox w = new InputBox("Words matching a pattern", "Enter the pattern (using '*' and '?'", "")
+        var w = new InputBox("Words matching a pattern", "Enter the pattern (using '*' and '?'", "")
         {
             Owner = this
         };
         if (w.ShowDialog() == true)
         {
             DoClearIf();
-            string pattern = w.ResponseText.ToLower();
+            var pattern = w.ResponseText.ToLower();
             if (!string.IsNullOrWhiteSpace(pattern))
             {
-                List<string> returnList = new List<string>();
-                List<string> fileList = Core.Instance.ListOfActualWordFileSpecs();
-                int filecount = fileList.Count;
-                int counter = 0;
+                var returnList = new List<string>();
+                //List<string> fileList = Core.Instance.ListOfActualWordFileSpecs();
+                var filecount = _currentFiles.Count;
+                var counter = 0;
                 StatusbaritemRubric.Content = $"Words matching {pattern}";
-                foreach (string f in fileList)
+                foreach (var f in _currentFiles)
                 {
                     counter++;
                     ReportProgress(counter, filecount);
-                    using System.IO.StreamReader sr = new System.IO.StreamReader(f, Core.JbhEncoding);
+                    using var sr = new System.IO.StreamReader(f, Core.JbhEncoding);
                     while (!sr.EndOfStream)
                     {
-                        string? red = sr.ReadLine();
+                        var red = sr.ReadLine();
                         if (red is { } wd)
                         {
                             if (Core.MatchesTemplate(wd, pattern))
@@ -456,12 +460,12 @@ public partial class MainWindow
                 }
 
                 ListboxResults.Items.Clear();
-                foreach (string a in returnList)
+                foreach (var a in returnList)
                 {
                     AddResult(a);
                 }
 
-                ProgressbarProgress.Value = 0;
+                ReportProgress(0,100);
             }
         }
     }
@@ -474,11 +478,11 @@ public partial class MainWindow
         // skipWord = whether to skip any word containing this character e.g. apostrophe
         skipWord = false;
         unknownCharCode = 0;
-        foreach (char c in word)
+        foreach (var c in word)
         {
             var d = c;
             var e = '-';
-            int u = Convert.ToInt32(d);
+            var u = Convert.ToInt32(d);
             switch (u)
             {
                 case 97: // a
@@ -618,15 +622,14 @@ public partial class MainWindow
               1)  Pass the "updatePbDelegate" delegate that points to the ProgressBar1.SetValue method
               2)  Set the DispatcherPriority to "Background"
               3)  Pass an Object() Array containing the property to update (ProgressBar.ValueProperty) and the new value */
-        double extent = 100 * (v / m);
-        Dispatcher.Invoke(_updatePbDelegate, System.Windows.Threading.DispatcherPriority.Background
-            , new object[] {RangeBase.ValueProperty, extent});
+        var extent = 100 * (v / m);
+        Dispatcher.Invoke(_updatePbDelegate, System.Windows.Threading.DispatcherPriority.Background, RangeBase.ValueProperty, extent);
     }
 
     private void AddResult(string r)
     {
-        ListBoxItem lbi = new ListBoxItem();
-        TextBlock tb = new TextBlock
+        var lbi = new ListBoxItem();
+        var tb = new TextBlock
         {
             FontWeight = FontWeights.Medium, FontFamily = new FontFamily("Lucida Console")
             , FontSize = 14
@@ -645,8 +648,8 @@ public partial class MainWindow
     {
         UiServices.SetBusyState();
         ListboxResults.Items.Clear();
-        List<string> badfiles = Core.Instance.CorrectWordInWrongFileErrors();
-        foreach (string f in badfiles)
+        var badfiles = Core.Instance.CorrectWordInWrongFileErrors();
+        foreach (var f in badfiles)
         {
             AddResult(f);
         }
@@ -659,22 +662,22 @@ public partial class MainWindow
 
     private void buttonDelete_Click(object sender, RoutedEventArgs e)
     {
-        InputBox w = new InputBox("Find word to delete", "Enter a word or string of letters", string.Empty)
+        var w = new InputBox("Find word to delete", "Enter a word or string of letters", string.Empty)
         {
             Owner = this
         };
         if (w.ShowDialog() == true)
         {
-            string s = w.ResponseText;
+            var s = w.ResponseText;
             if (Core.Instance.IsKnown(s))
             {
-                MessageBoxResult answer = MessageBox.Show(
+                var answer = MessageBox.Show(
                     "Word is listed: " + s.ToUpper() + "\n\nDo you want to delete it?", "Remove word"
                     , MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (answer == MessageBoxResult.Yes)
                 {
-                    bool was = Core.Instance.RemoveWordFromDictionary(s);
-                    string msg = s.ToUpper() + " was not removed";
+                    var was = Core.Instance.RemoveWordFromDictionary(s);
+                    var msg = s.ToUpper() + " was not removed";
                     if (was)
                     {
                         msg = s.ToUpper() + " was removed";
@@ -690,32 +693,13 @@ public partial class MainWindow
         }
     }
 
-    private void radiobuttonFrench_Checked(object sender, RoutedEventArgs e)
-    {
-        Core.Instance.SetLanguageToFrench(true);
-        StatusbaritemLang.Content = Core.Instance.LanguageName;
-    }
-
-    private void radiobuttonEnglish_Checked(object sender, RoutedEventArgs e)
-    {
-        try
-        {
-            Core.Instance.SetLanguageToFrench(false);
-            StatusbaritemLang.Content = Core.Instance.LanguageName;
-        }
-        catch
-        {
-        }
-
-    }
-
     private void buttonCountdown_Click(object sender, RoutedEventArgs e)
     {
         bool dunok;
-        string rootword = string.Empty;
+        var rootword = string.Empty;
         do
         {
-            InputBox w = new InputBox("Countdown word finder", "Enter a string of 9 letters", string.Empty)
+            var w = new InputBox("Countdown word finder", "Enter a string of 9 letters", string.Empty)
             {
                 Owner = this
             };
@@ -729,7 +713,7 @@ public partial class MainWindow
                 }
                 else
                 {
-                    MessageBoxResult answ = MessageBox.Show($"NB This was a group of {rootword.Length} letters"
+                    var answ = MessageBox.Show($"NB This was a group of {rootword.Length} letters"
                         , "Countdown", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                     if (answ == MessageBoxResult.Cancel)
                     {
@@ -751,21 +735,21 @@ public partial class MainWindow
         }
 
         DoClearIf();
-        List<string> anags = new List<string>();
+        var anags = new List<string>();
         rootword = rootword.ToLower().Trim();
         StatusbaritemRubric.Content = "Find words using " + rootword.ToUpper();
         rootword = Core.SortedLetterMix(rootword);
-        List<string> files = Core.Instance.ListOfActualWordFileSpecs();
-        int total = files.Count;
-        int counter = 0;
-        foreach (string f in files)
+        //List<string> files = Core.Instance.ListOfActualWordFileSpecs();
+        var total = _currentFiles.Count;
+        var counter = 0;
+        foreach (var f in _currentFiles)
         {
             counter++;
             ReportProgress(counter, total);
-            using System.IO.StreamReader sr = new System.IO.StreamReader(f, Core.JbhEncoding);
+            using var sr = new System.IO.StreamReader(f, Core.JbhEncoding);
             while (!sr.EndOfStream)
             {
-                string? red = sr.ReadLine();
+                var red = sr.ReadLine();
                 if (red is { } wd)
                 {
                     if (Core.Instance.IsSubset(wd, rootword))
@@ -777,17 +761,17 @@ public partial class MainWindow
         }
 
         ListboxResults.Items.Clear();
-        int maxlen = 0;
-        foreach (string a in anags)
+        var maxlen = 0;
+        foreach (var a in anags)
         {
             maxlen = Math.Max(maxlen, a.Length);
         }
 
-        int shown = 0;
-        for (int lgth = maxlen; lgth > 1; lgth--)
+        var shown = 0;
+        for (var lgth = maxlen; lgth > 1; lgth--)
         {
             AddResult($"{lgth}-LETTER WORDS");
-            foreach (string a in anags)
+            foreach (var a in anags)
             {
                 if (a.Length.Equals(lgth))
                 {
@@ -805,45 +789,45 @@ public partial class MainWindow
 
     private void buttonSingleStep_Click(object sender, RoutedEventArgs e)
     {
-        bool dunok;
-        string rootword = string.Empty;
+        bool dunOk;
+        var rootWord = string.Empty;
 
-        InputBox w = new InputBox("Words differing by a single letter", "Enter a word", string.Empty)
+        var w = new InputBox("Words differing by a single letter", "Enter a word", string.Empty)
         {
             Owner = this
         };
         if (w.ShowDialog() == true)
         {
-            rootword = w.ResponseText;
-            dunok = rootword.Length >= 2;
+            rootWord = w.ResponseText;
+            dunOk = rootWord.Length >= 2;
         }
         else
         {
-            dunok = false;
+            dunOk = false;
         }
 
-        if (!dunok)
+        if (!dunOk)
         {
             return;
         }
 
-        rootword = rootword.ToLower();
-        List<string> results = new List<string>();
-        StatusbaritemRubric.Content = $"Words differing from {rootword} by only one letter";
-        List<string> files = Core.Instance.ListOfActualWordFileSpecs();
-        int total = files.Count;
-        int counter = 0;
-        foreach (string f in files)
+        rootWord = rootWord.ToLower();
+        var results = new List<string>();
+        StatusbaritemRubric.Content = $"Words differing from {rootWord} by only one letter";
+        //List<string> files = Core.Instance.ListOfActualWordFileSpecs();
+        var total = _currentFiles.Count;
+        var counter = 0;
+        foreach (var f in _currentFiles)
         {
             counter++;
             ReportProgress(counter, total);
-            using System.IO.StreamReader sr = new System.IO.StreamReader(f, Core.JbhEncoding);
+            using var sr = new System.IO.StreamReader(f, Core.JbhEncoding);
             while (!sr.EndOfStream)
             {
-                string? red = sr.ReadLine();
+                var red = sr.ReadLine();
                 if (red is { } wd)
                 {
-                    int q = Core.DifferingByOneLetter(rootword, wd);
+                    var q = Core.DifferingByOneLetter(rootWord, wd);
                     if (q >= 0)
                     {
                         results.Add($"{wd} ({q})");
@@ -853,7 +837,7 @@ public partial class MainWindow
         }
 
         ListboxResults.Items.Clear();
-        foreach (string a in results)
+        foreach (var a in results)
         {
             AddResult(a);
         }
@@ -861,19 +845,19 @@ public partial class MainWindow
 
     private void MenuItemLettersInOrder_Click(object sender, RoutedEventArgs e)
     {
-        List<string> results = new List<string>();
+        var results = new List<string>();
         StatusbaritemRubric.Content = "Words with letters in alphabetical order";
-        List<string> files = Core.Instance.ListOfActualWordFileSpecs();
-        int total = files.Count;
-        int counter = 0;
-        foreach (string f in files)
+        //List<string> files = Core.Instance.ListOfActualWordFileSpecs();
+        var total = _currentFiles.Count;
+        var counter = 0;
+        foreach (var f in _currentFiles)
         {
             counter++;
             ReportProgress(counter, total);
-            using System.IO.StreamReader sr = new System.IO.StreamReader(f, Core.JbhEncoding);
+            using var sr = new System.IO.StreamReader(f, Core.JbhEncoding);
             while (!sr.EndOfStream)
             {
-                string? red = sr.ReadLine();
+                var red = sr.ReadLine();
                 if (red is { } wd)
                 {
                     if (Core.SortedLetterMix(wd) == wd)
@@ -885,7 +869,7 @@ public partial class MainWindow
         }
 
         ListboxResults.Items.Clear();
-        foreach (string a in results)
+        foreach (var a in results)
         {
             AddResult(a);
         }
@@ -893,22 +877,22 @@ public partial class MainWindow
 
     private void MenuItemStartEqualsEnd_Click(object sender, RoutedEventArgs e)
     {
-        List<string> results = new List<string>();
+        var results = new List<string>();
         StatusbaritemRubric.Content = "At least 3 letters at start of word match the end";
-        List<string> files = Core.Instance.ListOfActualWordFileSpecs();
-        int total = files.Count;
-        int counter = 0;
-        foreach (string f in files)
+        //List<string> files = Core.Instance.ListOfActualWordFileSpecs();
+        var total = _currentFiles.Count;
+        var counter = 0;
+        foreach (var f in _currentFiles)
         {
             counter++;
             ReportProgress(counter, total);
-            using System.IO.StreamReader sr = new System.IO.StreamReader(f, Core.JbhEncoding);
+            using var sr = new System.IO.StreamReader(f, Core.JbhEncoding);
             while (!sr.EndOfStream)
             {
-                string? red = sr.ReadLine();
+                var red = sr.ReadLine();
                 if (red is { } wd)
                 {
-                    int u = Core.EndAsStart(wd);
+                    var u = Core.EndAsStart(wd);
                     if (u > 0)
                     {
                         results.Add($"{wd} ({u})");
@@ -918,7 +902,7 @@ public partial class MainWindow
         }
 
         ListboxResults.Items.Clear();
-        foreach (string a in results)
+        foreach (var a in results)
         {
             AddResult(a);
         }
@@ -926,22 +910,22 @@ public partial class MainWindow
 
     private void MenuItemPalindromes_Click(object sender, RoutedEventArgs e)
     {
-        List<string> results = new List<string>();
+        var results = new List<string>();
         StatusbaritemRubric.Content = "Palindromes";
-        List<string> files = Core.Instance.ListOfActualWordFileSpecs();
-        int total = files.Count;
-        int counter = 0;
-        foreach (string f in files)
+        //List<string> files = Core.Instance.ListOfActualWordFileSpecs();
+        var total = _currentFiles.Count;
+        var counter = 0;
+        foreach (var f in _currentFiles)
         {
             counter++;
             ReportProgress(counter, total);
-            using System.IO.StreamReader sr = new System.IO.StreamReader(f, Core.JbhEncoding);
+            using var sr = new System.IO.StreamReader(f, Core.JbhEncoding);
             while (!sr.EndOfStream)
             {
-                string? red = sr.ReadLine();
+                var red = sr.ReadLine();
                 if (red is { } wd)
                 {
-                    bool u = Core.Palindromic(wd);
+                    var u = Core.Palindromic(wd);
                     if (u)
                     {
                         results.Add(wd);
@@ -951,7 +935,7 @@ public partial class MainWindow
         }
 
         ListboxResults.Items.Clear();
-        foreach (string a in results)
+        foreach (var a in results)
         {
             AddResult(a);
         }
@@ -959,22 +943,22 @@ public partial class MainWindow
 
     private void MenuItemAlternates_Click(object sender, RoutedEventArgs e)
     {
-        List<string> results = new List<string>();
+        var results = new List<string>();
         StatusbaritemRubric.Content = "Alternate letters match";
-        List<string> files = Core.Instance.ListOfActualWordFileSpecs();
-        int total = files.Count;
-        int counter = 0;
-        foreach (string f in files)
+        //List<string> files = Core.Instance.ListOfActualWordFileSpecs();
+        var total = _currentFiles.Count;
+        var counter = 0;
+        foreach (var f in _currentFiles)
         {
             counter++;
             ReportProgress(counter, total);
-            using System.IO.StreamReader sr = new System.IO.StreamReader(f, Core.JbhEncoding);
+            using var sr = new System.IO.StreamReader(f, Core.JbhEncoding);
             while (!sr.EndOfStream)
             {
                 var red = sr.ReadLine();
                 if (red is { } wd)
                 {
-                    bool u = Core.SameAlternateLetters(wd);
+                    var u = Core.SameAlternateLetters(wd);
                     if (u)
                     {
                         results.Add(wd);
@@ -984,51 +968,47 @@ public partial class MainWindow
         }
 
         ListboxResults.Items.Clear();
-        foreach (string a in results)
+        foreach (var a in results)
         {
             AddResult(a);
         }
     }
 
-    private void buttonBackToFrontStep_Click(object sender, RoutedEventArgs e)
+    private void BackToFrontButton_Click(object sender, RoutedEventArgs e)
     {
         var results = new List<string>();
         var pompoms = new List<string>();
         StatusbaritemRubric.Content = $"Words which can have their end moved to the beginning";
-        var files = Core.Instance.ListOfActualWordFileSpecs();
-        var total = files.Count;
+        //var files = Core.Instance.ListOfActualWordFileSpecs();
+        var total = _currentFiles.Count;
         var counter = 0;
         UiServices.SetBusyState();
-        foreach (var f in files)
+        foreach (var f in _currentFiles)
         {
-            counter++;
-            
             using var sr = new System.IO.StreamReader(f, Core.JbhEncoding);
             while (!sr.EndOfStream)
             {
                 var red = sr.ReadLine();
-                if (red is {Length: > 2} wd)
+                if (red is not {Length: > 2} wd) continue;
+                for (var s = 1; s < wd.Length; s++)
                 {
-                    for (var s = 1; s < wd.Length; s++)
+                    var firstChunk = wd[..s];
+                    var secondChunk = wd[s..];
+                    // only process if first chunk is alphabetically less than second chunk (to avoid duplicated consideration of same pair of words 
+                    if (string.Compare(secondChunk, firstChunk, StringComparison.Ordinal) < 0) continue;
+                    var reversed = secondChunk + firstChunk;
+                    if (!Core.Instance.IsKnown(reversed)) continue;
+                    if (wd == reversed)
                     {
-                        var a = wd[..s];
-                        var b = wd[s..];
-                        if (string.Compare(b, a, StringComparison.Ordinal) >= 0)
-                        {
-                            var c = b + a;
-                            if (!Core.Instance.IsKnown(c)) continue;
-                            if (wd == c)
-                            {
-                                pompoms.Add(wd);
-                            }
-                            else
-                            {
-                                results.Add($"{wd.ToUpperInvariant()} and {c.ToUpperInvariant()}");
-                            }
-                        }
+                        pompoms.Add(wd); // first and second chunks the same e.g. pompom
+                    }
+                    else
+                    {
+                        results.Add($"{wd.ToUpperInvariant()} and {reversed.ToUpperInvariant()}");
                     }
                 }
             }
+            counter++;
             ReportProgress(counter, total);
         }
 
@@ -1047,25 +1027,25 @@ public partial class MainWindow
 
     private void Rot13MenuItem_Click(object sender, RoutedEventArgs e)
     {
-        List<string> results = new List<string>();
-        List<string> matches = new List<string>();
+        var results = new List<string>();
+        var matches = new List<string>();
         StatusbaritemRubric.Content = $"Words whose ROT13 encoding is also a word";
-        List<string> files = Core.Instance.ListOfActualWordFileSpecs();
-        int total = files.Count;
-        int counter = 0;
-        foreach (string f in files)
+        //List<string> files = Core.Instance.ListOfActualWordFileSpecs();
+        var total = _currentFiles.Count;
+        var counter = 0;
+        foreach (var f in _currentFiles)
         {
             counter++;
             ReportProgress(counter, total);
-            using System.IO.StreamReader sr = new System.IO.StreamReader(f, Core.JbhEncoding);
+            using var sr = new System.IO.StreamReader(f, Core.JbhEncoding);
             while (!sr.EndOfStream)
             {
-                string? red = sr.ReadLine();
+                var red = sr.ReadLine();
                 if (red is { } word)
                 {
                     if (!matches.Contains(word))
                     {
-                        string code = Core.Rot13(word);
+                        var code = Core.Rot13(word);
                         if (Core.Instance.IsKnown(code))
                         {
                             results.Add($"{word.ToUpperInvariant()} and {code.ToUpperInvariant()}");
@@ -1077,7 +1057,7 @@ public partial class MainWindow
         }
 
         ListboxResults.Items.Clear();
-        foreach (string a in results)
+        foreach (var a in results)
         {
             AddResult(a);
         }
@@ -1088,10 +1068,10 @@ public partial class MainWindow
     {
         var results = new List<string>();
         StatusbaritemRubric.Content = "Words with AEIOU in alphabetical order";
-        List<string> files = Core.Instance.ListOfActualWordFileSpecs();
-        var total = files.Count;
+        //List<string> files = Core.Instance.ListOfActualWordFileSpecs();
+        var total = _currentFiles.Count;
         var counter = 0;
-        foreach (var f in files)
+        foreach (var f in _currentFiles)
         {
             counter++;
             ReportProgress(counter, total);
@@ -1114,5 +1094,28 @@ public partial class MainWindow
         {
             AddResult(a);
         }
+    }
+
+    private void MainWindow_OnContentRendered(object? sender, EventArgs e)
+    {
+        UiServices.SetBusyState();
+        _currentFiles = Core.Instance.ListOfActualWordFileSpecs();
+    }
+ 
+    private void radiobuttonFrench_Checked(object sender, RoutedEventArgs e)
+    {
+        Core.Instance.SetLanguageToFrench(true);
+        StatusbaritemLang.Content = Core.Instance.LanguageName;
+        UiServices.SetBusyState();
+        _currentFiles = Core.Instance.ListOfActualWordFileSpecs();
+    }
+
+    private void radiobuttonEnglish_Checked(object sender, RoutedEventArgs e)
+    {
+ if (!_loaded){return;}       
+        Core.Instance.SetLanguageToFrench(false);
+        StatusbaritemLang.Content = Core.Instance.LanguageName;
+        UiServices.SetBusyState();
+        _currentFiles = Core.Instance.ListOfActualWordFileSpecs();
     }
 }

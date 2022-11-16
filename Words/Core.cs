@@ -208,17 +208,17 @@ public sealed class Core
             return Path.Combine(DataPool, "Words__small.txt");
         }
 
-        ltrs = ltrs.Substring(0, 3).ToLower();
-        return Path.Combine(DataPool, "Words_" + ltrs + ".txt");
+        ltrs = ltrs[..3].ToLower();
+        return Path.Combine(DataPool, $"Words_{ltrs}.txt");
     }
 
     private string FilePath2015(int letr1, int letr2, int letr3)
     {
-        char c1 = (char) (96 + letr1);
-        char c2 = (char) (96 + letr2);
-        char c3 = (char) (96 + letr3);
-        string s = c1.ToString() + c2.ToString() + c3.ToString();
-        return FilePath2015(s);
+        var c1 = (char) (96 + letr1);
+        var c2 = (char) (96 + letr2);
+        var c3 = (char) (96 + letr3);
+        var u = $"{c1}{c2}{c3}";
+        return FilePath2015(u);
     }
 
     public bool IsSubset(string putativeSubstring, string mainString)
@@ -636,7 +636,7 @@ public sealed class Core
         string shortwordspec = FilePath2015("x");
         bool wrongFile = false;
 
-        using (StreamReader sr = new StreamReader(shortwordspec,JbhEncoding))
+        using (var sr = new StreamReader(shortwordspec,JbhEncoding))
         {
             while (!sr.EndOfStream)
             {
@@ -800,7 +800,7 @@ public sealed class Core
         string subfile = FilePath2015(searchword);
         if (File.Exists(subfile))
         {
-            using StreamReader sr = new StreamReader(subfile,JbhEncoding);
+            using var sr = new StreamReader(subfile,JbhEncoding);
             while (!sr.EndOfStream)
             {
                 string? red = sr.ReadLine();
