@@ -19,6 +19,7 @@ public sealed class Core
     public static Core Instance { get; } = new Core();
 
     private bool _french;
+    
     public static readonly Encoding JbhEncoding = Encoding.UTF8;
 
     public void SetLanguageToFrench(bool langFrench)
@@ -250,6 +251,20 @@ public sealed class Core
         foreach (char c in candidate)
         {
             if (!"abcdef".Contains(c))
+            {
+                rv = false;
+                break;
+            }
+        }
+
+        return rv;
+    }
+    public bool UsesOnlyCalculatorLetters(string candidate)
+    {
+        bool rv = true;
+        foreach (char c in candidate)
+        {
+            if (!"beghilosz".Contains(c))
             {
                 rv = false;
                 break;
@@ -745,7 +760,7 @@ public sealed class Core
         return returnList;
     }
 
-    public List<string> ListOfNonEmptyTriples()
+    private List<string> ListOfNonEmptyTriples()
     {
         List<string> returnList = new List<string>();
         for (int letter1 = 1; letter1 < 27; letter1++)

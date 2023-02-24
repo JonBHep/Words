@@ -2,11 +2,12 @@
 
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>net6.0-windows</TargetFramework>
+        <TargetFramework>net7.0-windows</TargetFramework>
         <Nullable>enable</Nullable>
         <UseWPF>true</UseWPF>
         <ApplicationIcon>JH Aramis bleu reference.ico</ApplicationIcon>
         <NeutralLanguage>en-GB</NeutralLanguage>
+        <LangVersion>11</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>

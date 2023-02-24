@@ -1,32 +1,32 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Jbh.Original\\Jbh.Info\\Code\\Jbh.Apps\\CSharp-WPF-NET6\\Utile\\Words\\Words\\Words.csproj": {}
+    "C:\\Jbh.Original\\Jbh.Info\\Code\\Jbh.Apps\\DotNet\\Useful\\Words\\Words\\Words.csproj": {}
   },
   "projects": {
-    "C:\\Jbh.Original\\Jbh.Info\\Code\\Jbh.Apps\\CSharp-WPF-NET6\\Utile\\Words\\Words\\Words.csproj": {
+    "C:\\Jbh.Original\\Jbh.Info\\Code\\Jbh.Apps\\DotNet\\Useful\\Words\\Words\\Words.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Jbh.Original\\Jbh.Info\\Code\\Jbh.Apps\\CSharp-WPF-NET6\\Utile\\Words\\Words\\Words.csproj",
+        "projectUniqueName": "C:\\Jbh.Original\\Jbh.Info\\Code\\Jbh.Apps\\DotNet\\Useful\\Words\\Words\\Words.csproj",
         "projectName": "Words",
-        "projectPath": "C:\\Jbh.Original\\Jbh.Info\\Code\\Jbh.Apps\\CSharp-WPF-NET6\\Utile\\Words\\Words\\Words.csproj",
+        "projectPath": "C:\\Jbh.Original\\Jbh.Info\\Code\\Jbh.Apps\\DotNet\\Useful\\Words\\Words\\Words.csproj",
         "packagesPath": "C:\\Users\\jonat\\.nuget\\packages\\",
-        "outputPath": "C:\\Jbh.Original\\Jbh.Info\\Code\\Jbh.Apps\\CSharp-WPF-NET6\\Utile\\Words\\Words\\obj\\",
+        "outputPath": "C:\\Jbh.Original\\Jbh.Info\\Code\\Jbh.Apps\\DotNet\\Useful\\Words\\Words\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\jonat\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net6.0-windows"
+          "net7.0-windows"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net6.0-windows7.0": {
-            "targetAlias": "net6.0-windows",
+          "net7.0-windows7.0": {
+            "targetAlias": "net7.0-windows",
             "projectReferences": {}
           }
         },
@@ -37,8 +37,8 @@
         }
       },
       "frameworks": {
-        "net6.0-windows7.0": {
-          "targetAlias": "net6.0-windows",
+        "net7.0-windows7.0": {
+          "targetAlias": "net7.0-windows",
           "imports": [
             "net461",
             "net462",
@@ -58,7 +58,7 @@
               "privateAssets": "none"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.402\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.103\\RuntimeIdentifierGraph.json"
         }
       }
     }

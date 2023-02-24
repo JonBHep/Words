@@ -40,6 +40,7 @@
                 <MenuItem Header="Palindromes" Click="MenuItemPalindromes_Click"/>
                 <MenuItem Header="Alternate letters match" Click="MenuItemAlternates_Click"/>
                 <MenuItem Header="ROT13 pairs" Click="Rot13MenuItem_Click"/>
+                <MenuItem Header="Calculator upside-down words" Click="CalculatorWords"></MenuItem>
             </MenuItem>
             <!--<MenuItem Header="Tools">
                 <MenuItem x:Name="menuitemWordBrain" Header="WordBrain helper" FontWeight="Medium" Foreground="DarkBlue" Click="menuitemWordBrain_Click"/>
@@ -71,12 +72,10 @@
                 <Button Click="buttonSubsets_Click">Subsets</Button>
                 <Button Click="buttonCountdown_Click" FontWeight="DemiBold" Foreground="DarkBlue">Countdown</Button>
                 <Button Click="buttonDelete_Click">Delete</Button>
-                <Button Click="buttonCount_Click">Count</Button>
                 <Button Click="buttonClear_Click">Clear</Button>
                 <Button Click="HexWordsButton_Click" ToolTip="Words using only the letters A to F">Hex words</Button>
                 <Button ToolTip="Words differing by a single letter" Click="buttonSingleStep_Click">One letter</Button>
                 <Button ToolTip="Words with the end moved to the start to make a new word" Click="BackToFrontButton_Click">AB-BA</Button>
-                <!-- <Button FontWeight="Medium" Margin="0 12 0 12" Foreground="Crimson" Click="CrosswordsButton_OnClick">Crosswords</Button> -->
                 <Button FontWeight="Medium" Click="buttonClose_Click">Close</Button>
                 <CheckBox x:Name="ChkClear" Margin="4" VerticalContentAlignment="Center">Clear first</CheckBox>
             </StackPanel>
